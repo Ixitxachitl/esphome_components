@@ -20,10 +20,10 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
     // Map special characters and arrow keys to descriptive names
     switch (key) {
       // Arrow keys
-      case 0xB4: key_str = "RIGHT_ARROW"; break;
+      case 0xB4: key_str = "LEFT_ARROW"; break;
       case 0xB5: key_str = "UP_ARROW"; break;
       case 0xB6: key_str = "DOWN_ARROW"; break;
-      case 0xB7: key_str = "LEFT_ARROW"; break;
+      case 0xB7: key_str = "RIGHT_ARROW"; break;
 
       // Other special keys
       case 27: key_str = "ESC"; break;
