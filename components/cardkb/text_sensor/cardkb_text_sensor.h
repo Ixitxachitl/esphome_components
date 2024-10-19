@@ -9,6 +9,16 @@ namespace cardkb {
 
 class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor, public Component {
  public:
+  CardKBTextSensor() = default;
+
+  void setup() override {
+    // Initialization code if needed
+  }
+
+  void loop() override {
+    // Periodic tasks if needed
+  }
+
   void key_pressed(uint8_t key) override {
     std::string key_str;
     if (key < 32) {
@@ -18,9 +28,6 @@ class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor, 
     }
     this->publish_state(key_str);
   }
-
-  void setup() override {}
-  void loop() override {}
 
   void key_released(uint8_t key) override {
     // Optional: clear the sensor state on key release
