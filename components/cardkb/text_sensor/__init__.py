@@ -11,17 +11,17 @@ CONF_CARDKB_ID = 'cardkb_id'
 
 CONFIG_SCHEMA = i2c.i2c_device_schema(None).extend(
     {
-        cv.GenerateID(): cv.declare_id(CardKB),
-        cv.Optional(CONF_ID): cv.declare_id(CardKBTextSensor),
+        cv.GenerateID(CONF_CARDKB_ID): cv.declare_id(CardKB),
+        cv.Required(CONF_ID): cv.declare_id(CardKBTextSensor),
     }
 )
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
-    await i2c.register_i2c_device(var, config)
+    cardkb_var = cg.new_Pvariable(config[CONF_CARDKB_ID])
+    await cg.register_component(cardkb_var, config)
+    await i2c.register_i2c_device(cardkb_var, config)
 
     text_sensor_var = cg.new_Pvariable(config[CONF_ID])
     await text_sensor.register_text_sensor(text_sensor_var, config)
     await cg.register_component(text_sensor_var, config)
-    cg.add(var.register_listener(text_sensor_var))
+    cg.add(cardkb_var.register_listener(text_sensor_var))
