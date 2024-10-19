@@ -1,20 +1,37 @@
-# CardKB: https://shop.m5stack.com/products/cardkb-mini-keyboard
+# CardKB Component for ESPHome
 
-This component is for the CardKB device.  Define a `cardkb` component then add `binary_sensor`s to handle individual keys.
-If you want automatic handling for multiple keys, e.g. PIN entry, use the `key_collector` component.
+This ESPHome component supports the [CardKB mini keyboard](https://shop.m5stack.com/products/cardkb-mini-keyboard). It provides integration for key detection using a `text_sensor` to display the most recent key pressed, including special handling for arrow keys and other non-character keys like ESC, TAB, BACKSPACE, and ENTER.
 
-Example:
+## Features
+- **Text Sensor**: Captures and displays the last key pressed on the CardKB, with support for special keys.
+- **I2C Configuration**: Easily configurable over I2C, supporting custom I2C settings.
+
+## Setup
+
+1. **Declare the `cardkb` component** in your YAML configuration to set up the keyboard interface.
+2. **Add a `text_sensor` component** to display the last key pressed.
+
+## Example Configuration
+
 ```yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/Ixitxachitl/esphome_components
+    components: [cardkb]
+
+i2c:
+  sda: GPIO26 # For Atom Lite
+  scl: GPIO32 # -^
+  scan: true
+  id: i2c_bus
+
+# CardKB component declaration
 cardkb:
-  - id: mykb  #optional
+  address: 0x5F
 
-binary_sensor:
+# Text Sensor to display the last key pressed
+text_sensor:
   - platform: cardkb
-    cardkb_id: mykb  #optional if only one keyboard
-    id: a_key
-    key: a
-  - platform: cardkb
-    id: enter_key
-    key: 13
-```
-
+    id: cardkb_text
+    name: "Key"
