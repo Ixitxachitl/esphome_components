@@ -7,6 +7,17 @@ namespace cardkb {
 
 static const char *TAG = "cardkb";
 
+// Define NeoPixel I2C commands (assumes protocol is documented somewhere)
+static const uint8_t NEOPIXEL_CMD_SET_COLOR = 0x01;
+
+void CardKB::set_neopixel_color(uint8_t r, uint8_t g, uint8_t b) {
+  uint8_t data[4] = {NEOPIXEL_CMD_SET_COLOR, r, g, b};
+  auto res = this->write(data, sizeof(data));
+  if (res != i2c::NO_ERROR) {
+    ESP_LOGW(TAG, "Failed to set NeoPixel color");
+  }
+}
+
 void CardKB::loop() {
   uint8_t c;
   c = this->pressed_key_;
