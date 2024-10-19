@@ -8,9 +8,10 @@ Example:
 external_components:
   - source:
       type: git
-      url: https://github.com/ssieb/esphome_components
+      url: https://github.com/Ixitxachitl/esphome_components
     components: [ component1, component2 ]
 ```
+So far the only updated component in this repository is the cardkb
 
 ## NOTE: Some components have been merged to esphome :tada:
 - keypad, matrix_keypad -> [matrix_keypad](https://esphome.io/components/matrix_keypad)
