@@ -23,5 +23,5 @@ async def to_code(config):
 
     text_sensor_var = cg.new_Pvariable(config[CONF_ID])
     await text_sensor.register_text_sensor(text_sensor_var, config)
-    await cg.register_component(text_sensor_var, config)
     cg.add(cardkb_var.register_listener(text_sensor_var))
+    await cg.register_component(text_sensor_var, config)  # Ensure proper registration
