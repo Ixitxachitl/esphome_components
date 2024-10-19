@@ -19,13 +19,13 @@ class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor, 
     this->publish_state(key_str);
   }
 
+  void setup() override {}
+  void loop() override {}
+
   void key_released(uint8_t key) override {
     // Optional: clear the sensor state on key release
     // this->publish_state("");
   }
-
-  void setup() override {}
-  void loop() override {}
 };
 
 }  // namespace cardkb
