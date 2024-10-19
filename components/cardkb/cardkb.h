@@ -22,11 +22,8 @@ class CardKB : public key_provider::KeyProvider, public Component, public i2c::I
 
  protected:
   int pressed_key_ = -1;
-
-  std::vector<CardKBListener *> listeners_{};
+  std::vector<CardKBListener *> listeners_;
 };
 
 }  // namespace cardkb
 }  // namespace esphome
-
-
