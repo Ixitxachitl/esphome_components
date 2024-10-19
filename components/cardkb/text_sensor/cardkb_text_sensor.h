@@ -7,17 +7,12 @@
 namespace esphome {
 namespace cardkb {
 
-class CardKBTextSensor : public text_sensor::TextSensor, public CardKBListener, public Component {
+class CardKBTextSensor : public text_sensor::TextSensor, public Component, public CardKBListener {
  public:
   CardKBTextSensor() = default;
 
-  void setup() override {
-    // Initialization code if needed
-  }
-
-  void loop() override {
-    // Periodic tasks if needed
-  }
+  void setup() override {}
+  void loop() override {}
 
   void key_pressed(uint8_t key) override {
     std::string key_str;
@@ -30,7 +25,7 @@ class CardKBTextSensor : public text_sensor::TextSensor, public CardKBListener, 
   }
 
   void key_released(uint8_t key) override {
-    // Optional: clear the sensor state on key release
+    // Optional: clear the state on key release
     // this->publish_state("");
   }
 };
