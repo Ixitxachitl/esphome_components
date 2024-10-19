@@ -7,7 +7,7 @@
 namespace esphome {
 namespace cardkb {
 
-class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor, public Component {
+class CardKBTextSensor : public text_sensor::TextSensor, public CardKBListener, public Component {
  public:
   CardKBTextSensor() = default;
 
