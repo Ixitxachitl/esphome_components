@@ -46,7 +46,7 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
 
   void key_released(uint8_t key) override {
     // Optional: clear the sensor state on key release
-    // this->publish_state("");
+    this->publish_state("");
   }
 };
 
