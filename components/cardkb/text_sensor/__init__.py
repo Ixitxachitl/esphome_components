@@ -17,14 +17,13 @@ CONFIG_SCHEMA = i2c.i2c_device_schema().extend(
 )
 
 async def to_code(config):
+    # Initialize CardKB instance
     cardkb_var = cg.new_Pvariable(config[CONF_CARDKB_ID])
     await cg.register_component(cardkb_var, config)
     await i2c.register_i2c_device(cardkb_var, config)
 
+    # Initialize CardKBTextSensor
     text_sensor_var = cg.new_Pvariable(config[CONF_ID])
     cg.add(cardkb_var.register_listener(text_sensor_var))
     await text_sensor.register_text_sensor(text_sensor_var, config)
-    await cg.register_component(text_sensor_var, config)
-
-    # Add debug logging
-    cg.add_global(cg.RawExpression('ESP_LOGD("cardkb", "CardKBTextSensor initialized")'))
+    await cg.register_component(text_sensor_var, config)  # Ensure component registration
