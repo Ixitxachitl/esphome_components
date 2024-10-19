@@ -2,11 +2,12 @@
 
 #include "esphome/components/cardkb/cardkb.h"
 #include "esphome/components/text_sensor/text_sensor.h"
+#include "esphome/core/component.h"
 
 namespace esphome {
 namespace cardkb {
 
-class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor {
+class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor, public Component {
  public:
   void key_pressed(uint8_t key) override {
     std::string key_str;
@@ -22,6 +23,9 @@ class CardKBTextSensor : public CardKBListener, public text_sensor::TextSensor {
     // Optional: clear the sensor state on key release
     // this->publish_state("");
   }
+
+  void setup() override {}
+  void loop() override {}
 };
 
 }  // namespace cardkb
