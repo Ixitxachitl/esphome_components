@@ -34,7 +34,7 @@ cardkb:
 text_sensor:
   - platform: cardkb
     id: cardkb_text
-    name: "Key"
+    name: Key
 ```
 ## Functionality
 # Text Sensor
