@@ -38,13 +38,13 @@ text_sensor:
 ```
 ## Functionality
 # Text Sensor
-- The text_sensor captures and displays the most recent key pressed on the CardKB, including special keys:
-  - ESC → "ESC"
-  - TAB → "TAB"
-  - BACKSPACE → "BACKSPACE"
-  - ENTER → "ENTER"
-  - Arrow keys: LEFT_ARROW, RIGHT_ARROW, UP_ARROW, DOWN_ARROW
+- The `text_sensor` captures and displays the most recent key pressed on the CardKB, including special keys:
+  - `ESC` → `"ESC"`
+  - `TAB` → `"TAB"`
+  - `BACKSPACE` → `"BACKSPACE"`
+  - `ENTER` → `"ENTER"`
+  - Arrow keys: `LEFT_ARROW`, `RIGHT_ARROW`, `UP_ARROW`, `DOWN_ARROW`
 # Usage Notes
-- I2C Settings: Ensure that the I2C settings match your hardware configuration.
-- Special Key Handling: The component automatically converts non-character keys to readable names for display.
+- **I2C Settings:** Ensure that the I2C settings match your hardware configuration.
+- **Special Key Handling:** The component automatically converts non-character keys to readable names for display.
 This streamlined setup allows you to monitor key presses on the CardKB in ESPHome with a single text_sensor.
