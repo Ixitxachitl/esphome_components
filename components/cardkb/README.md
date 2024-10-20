@@ -1,6 +1,6 @@
 # CardKB Component for ESPHome
 
-This ESPHome component supports the [CardKB mini keyboard](https://shop.m5stack.com/products/cardkb-mini-keyboard). It provides integration for key detection using a `text_sensor` to display the most recent key pressed, including special handling for arrow keys and other non-character keys like ESC, TAB, BACKSPACE, and ENTER.
+This ESPHome component supports the [CardKB mini keyboard](https://shop.m5stack.com/products/cardkb-mini-keyboard-programmable-unit-v1-1-mega8a). It provides integration for key detection using a `text_sensor` to display the most recent key pressed, including special handling for arrow keys and other non-character keys like ESC, TAB, BACKSPACE, and ENTER.
 
 ## Features
 - **Text Sensor**: Captures and displays the last key pressed on the CardKB, with support for special keys.
