@@ -20,7 +20,9 @@ void CardKB::loop() {
   if ((res != i2c::NO_ERROR) || (c == 0))
     return;
 
-  ESP_LOGD(TAG, "keycode '%d' pressed", c);
+  if (c < 32)
+    ESP_LOGD(TAG, "keycode '%d' pressed", c);
+
   ESP_LOGD(TAG, "key '%c' pressed", c);
 
   for (auto &listener : this->listeners_) {
