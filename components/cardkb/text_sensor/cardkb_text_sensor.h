@@ -11,7 +11,11 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
  public:
   CardKBTextSensor() = default;
 
-  void setup() override {}
+  void setup() override {
+    // Set initial state to "NONE"
+    this->publish_state("NONE");
+  }
+
   void loop() override {}
 
   void key_pressed(uint8_t key) override {
@@ -19,13 +23,10 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
 
     // Map special characters and arrow keys to descriptive names
     switch (key) {
-      // Arrow keys
-      case 0xB4: key_str = "LEFT_ARROW"; break;
+      case 0xB4: key_str = "RIGHT_ARROW"; break;
       case 0xB5: key_str = "UP_ARROW"; break;
       case 0xB6: key_str = "DOWN_ARROW"; break;
-      case 0xB7: key_str = "RIGHT_ARROW"; break;
-
-      // Other special keys
+      case 0xB7: key_str = "LEFT_ARROW"; break;
       case 27: key_str = "ESC"; break;
       case 9: key_str = "TAB"; break;
       case 8: key_str = "BACKSPACE"; break;
@@ -45,8 +46,8 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
   }
 
   void key_released(uint8_t key) override {
-    // Optional: clear the sensor state on key release
-    this->publish_state("");
+    // Set the state to "NONE" when no key is pressed
+    this->publish_state("NONE");
   }
 };
 
