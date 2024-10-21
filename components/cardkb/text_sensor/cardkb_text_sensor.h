@@ -35,7 +35,7 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
       case 9: key_str = "TAB"; break;
       case 8: key_str = "BACKSPACE"; break;
       case 13: key_str = "ENTER"; break;
-      case 175: key_str = "SPACE"; break;
+      case 32: key_str = "SPACE"; break;
 
       // Printable ASCII range
       default:
