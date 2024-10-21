@@ -49,7 +49,7 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
     // Publish the key string to the text sensor
     this->publish_state(key_str);
 
-    // Optionally, reset to "NONE" after a short delay (handled in loop)
+    this->publish_state("NONE");
   }
 };
 
