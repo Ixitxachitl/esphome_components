@@ -24,7 +24,6 @@ i2c:
   sda: GPIO26 # For Atom Lite
   scl: GPIO32 # -^
   scan: true
-  id: i2c_bus
 
 # CardKB component declaration
 cardkb:
