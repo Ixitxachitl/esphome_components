@@ -19,9 +19,13 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
   void loop() override {}
 
   void key_pressed(uint8_t key) override {
+    // Since firmware sends key event on release, ignore this
+  }
+
+  void key_released(uint8_t key) override {
     std::string key_str;
 
-    // Map special characters and arrow keys to descriptive names
+    // Map key codes to descriptive names
     switch (key) {
       case 0xB4: key_str = "RIGHT_ARROW"; break;
       case 0xB5: key_str = "UP_ARROW"; break;
@@ -31,8 +35,8 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
       case 9: key_str = "TAB"; break;
       case 8: key_str = "BACKSPACE"; break;
       case 13: key_str = "ENTER"; break;
-      case 32: key_str = "SPACE"; break; // Space key mapping
-     
+      case 175: key_str = "SPACE"; break;
+
       // Printable ASCII range
       default:
         if (key >= 0x20 && key <= 0x7E) {
@@ -44,11 +48,8 @@ class CardKBTextSensor : public text_sensor::TextSensor, public Component, publi
 
     // Publish the key string to the text sensor
     this->publish_state(key_str);
-  }
 
-  void key_released(uint8_t key) override {
-    // Set the state to "NONE" when no key is pressed
-    this->publish_state("NONE");
+    // Optionally, reset to "NONE" after a short delay (handled in loop)
   }
 };
 
