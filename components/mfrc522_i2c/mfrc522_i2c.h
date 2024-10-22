@@ -3,7 +3,6 @@
 #include "esphome/core/component.h"
 #include "esphome/components/rc522/rc522.h"
 #include "esphome/components/i2c/i2c.h"
-#include <vector>
 #include <string>
 
 namespace esphome {
@@ -17,8 +16,9 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
 
   void on_scan();
 
-  // Holds the UID and FIFO as strings
-  std::vector<std::string> x;
+  // Exposed UID and FIFO as strings
+  std::string x;  // For UID
+  std::string y;  // For FIFO data
 
   // Implementing pure virtual methods from RC522
   uint8_t pcd_read_register(rc522::RC522::PcdRegister reg) override;
@@ -29,7 +29,6 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  protected:
   uint8_t read_uid(uint8_t *uid);
   void read_fifo_data(uint8_t count);
-  std::vector<std::string> convert_to_list(const uint8_t *uid, uint8_t uid_length);
 
  private:
   uint8_t fifo_data_[MAX_FIFO_SIZE];
