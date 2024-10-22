@@ -7,10 +7,12 @@
 namespace esphome {
 namespace mfrc522_i2c {
 
-// Define register addresses as constants
-static const uint8_t COMMAND_REG = 0x0D;
-static const uint8_t FIFO_DATA_REG = 0x09;
-static const uint8_t CONTROL_REG = 0x0C;
+enum PcdRegister {
+  CommandReg = 0x0D,
+  FIFODataReg = 0x09,
+  ControlReg = 0x0C,
+  // Add more registers as needed
+};
 
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
