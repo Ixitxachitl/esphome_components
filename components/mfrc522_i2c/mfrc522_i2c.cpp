@@ -6,17 +6,13 @@ namespace mfrc522_i2c {
 
 static const char *const TAG = "mfrc522_i2c";
 
-// Define register addresses as integers for direct use
-static const uint8_t COMMAND_REG = 0x01;  // Correct value for CommandReg
-static const uint8_t FIFO_DATA_REG = 0x09;  // Correct value for FIFODataReg
-
 void MFRC522I2C::dump_config() {
   RC522::dump_config();
   LOG_I2C_DEVICE(this);
 }
 
 bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
-  // Use integer constants for register addresses
+  // Use constants from header file
   this->pcd_write_register(static_cast<PcdRegister>(COMMAND_REG), 0x93);  // PCD_Anticoll (0x93)
 
   // Read UID from FIFODataReg
@@ -28,7 +24,7 @@ bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
 }
 
 bool MFRC522I2C::read_sak(uint8_t *sak) {
-  // Use integer constants for register addresses
+  // Use constants from header file
   this->pcd_write_register(static_cast<PcdRegister>(COMMAND_REG), 0x70);  // PCD_Select (0x70)
 
   // Read SAK from FIFODataReg
@@ -38,7 +34,7 @@ bool MFRC522I2C::read_sak(uint8_t *sak) {
 }
 
 bool MFRC522I2C::read_atqa(uint16_t *atqa) {
-  // Use integer constants for register addresses
+  // Use constants from header file
   this->pcd_write_register(static_cast<PcdRegister>(COMMAND_REG), 0x26);  // PCD_REQA (0x26)
 
   // Read ATQA from FIFODataReg
