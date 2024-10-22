@@ -28,20 +28,22 @@ void MFRC522I2C::on_scan() {
 }
 
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  // Use CollReg to check collision status for UID read
-  this->pcd_write_register(rc522::RC522::CollReg, 0x80);  // Enable collision detection
-  
-  // Read the UID from FIFODataReg
-  uint8_t uid_length = this->pcd_read_register(rc522::RC522::FIFOLevelReg);  // Get the number of bytes in FIFO
+  // Enable collision detection by writing to CollReg (0x0E)
+  this->pcd_write_register(static_cast<rc522::RC522::PcdRegister>(0x0E), 0x80);
+
+  // Read the number of bytes in the FIFO from FIFOLevelReg (0x0A)
+  uint8_t uid_length = this->pcd_read_register(static_cast<rc522::RC522::PcdRegister>(0x0A));
   if (uid_length > 0) {
-    this->pcd_read_register(rc522::RC522::FIFODataReg, uid_length, uid, 0);  // Read UID data
+    // Read UID data from FIFODataReg (0x09)
+    this->pcd_read_register(static_cast<rc522::RC522::PcdRegister>(0x09), uid_length, uid, 0);
   }
   return uid_length;
 }
 
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
-    this->pcd_read_register(rc522::RC522::FIFODataReg, count, this->fifo_data_, 0);  // Read FIFO data
+    // Read FIFO data from FIFODataReg (0x09)
+    this->pcd_read_register(static_cast<rc522::RC522::PcdRegister>(0x09), count, this->fifo_data_, 0);
     this->fifo_data_length_ = count;
   }
 }
