@@ -46,7 +46,7 @@ std::string MFRC522I2C::get_uid() {
   uint8_t buffer_size = sizeof(buffer);
 
   // Use the RC522 method to read the card UID
-  if (this->read_card_serial(buffer, &buffer_size)) {
+  if (this->request_tag() && this->anti_collision(buffer, &buffer_size)) {
     this->uid_ = "";
     for (uint8_t i = 0; i < buffer_size; i++) {
       char hex[3];
@@ -62,11 +62,11 @@ std::string MFRC522I2C::get_uid() {
 }
 
 std::string MFRC522I2C::get_fifo_data() {
-  uint8_t fifo_size = this->pcd_read_register(PcdRegister::FIFOLevelReg);
+  uint8_t fifo_size = this->pcd_read_register(PcdRegister::FIFOLevel);
   uint8_t buffer[fifo_size];
 
   // Read FIFO data
-  this->pcd_read_register(PcdRegister::FIFODataReg, fifo_size, buffer, 0);
+  this->pcd_read_register(PcdRegister::FIFOData, fifo_size, buffer, 0);
 
   this->fifo_data_ = "";
   for (uint8_t i = 0; i < fifo_size; i++) {
