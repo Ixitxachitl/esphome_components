@@ -9,23 +9,14 @@ namespace mfrc522_i2c {
 
 static const uint8_t MAX_FIFO_SIZE = 64;
 
-enum MFRC522_LocalRegister : uint8_t {
-  FIFODataReg = 0x09,
-  FIFOLevelReg = 0x0A,
-  ControlReg = 0x0C,
-  UIDStartReg = 0x20,
-  UIDSizeReg = 0x21
-};
-
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
-  MFRC522I2C() : x_(0), y_("") {}
-
-  // These functions return x_ and y_ directly
-  uint32_t get_x() const { return x_; }
-  std::string get_y() const { return y_; }
+  MFRC522I2C() : x_("") {}
 
   void on_scan();
+
+  // Direct access to x_ as a list of strings
+  std::vector<std::string> x;
 
   // Implement pure virtual methods from RC522
   uint8_t pcd_read_register(rc522::RC522::PcdRegister reg) override;
@@ -36,11 +27,9 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  protected:
   uint8_t read_uid(uint8_t *uid);
   void read_fifo_data(uint8_t count);
-  std::string get_fifo_data_as_string();
+  std::vector<std::string> convert_to_list(const uint8_t *uid, uint8_t uid_length);
 
  private:
-  uint32_t x_;
-  std::string y_;
   uint8_t fifo_data_[MAX_FIFO_SIZE];
   uint8_t fifo_data_length_;
 };

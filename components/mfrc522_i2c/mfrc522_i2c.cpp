@@ -9,25 +9,18 @@ static const char *const TAG = "mfrc522_i2c";
 void MFRC522I2C::on_scan() {
   uint8_t uid[10];
   uint8_t uid_length = this->read_uid(uid);
-  if (uid_length > 0) {
-    this->x_ = 0;
-    for (uint8_t i = 0; i < uid_length; i++) {
-      this->x_ = (this->x_ << 8) | uid[i];
-    }
-    ESP_LOGD(TAG, "UID (x_): %u", this->x_);
-  } else {
-    ESP_LOGW(TAG, "Failed to read UID");
-  }
+  this->read_fifo_data(10);  // Adjust the count as needed
 
-  this->read_fifo_data(10);
-  this->y_ = this->get_fifo_data_as_string();
-  ESP_LOGD(TAG, "FIFO Data (y_): %s", this->y_.c_str());
+  // Convert UID and FIFO data into a list and assign to x_
+  this->x = this->convert_to_list(uid, uid_length);
+
+  ESP_LOGD(TAG, "Combined Data List (x): [UID: %s, FIFO: %s]", this->x[0].c_str(), this->x[1].c_str());
 }
 
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  uint8_t uid_length = this->pcd_read_register(rc522::RC522::UIDSizeReg);
+  uint8_t uid_length = this->pcd_read_register(rc522::RC522::VersionReg);  // Placeholder for UID length register
   if (uid_length > 0) {
-    this->pcd_read_register(rc522::RC522::UIDStartReg, uid_length, uid, 0);
+    this->pcd_read_register(rc522::RC522::ModeReg, uid_length, uid, 0);  // Placeholder for UID data register
   }
   return uid_length;
 }
@@ -39,15 +32,27 @@ void MFRC522I2C::read_fifo_data(uint8_t count) {
   }
 }
 
-std::string MFRC522I2C::get_fifo_data_as_string() {
-  std::string fifo_output;
-  for (uint8_t i = 0; i < this->fifo_data_length_; i++) {
-    fifo_output += std::to_string(this->fifo_data_[i]);
-    if (i < this->fifo_data_length_ - 1) {
-      fifo_output += " ";
+std::vector<std::string> MFRC522I2C::convert_to_list(const uint8_t *uid, uint8_t uid_length) {
+  std::string uid_str, fifo_str;
+
+  // Convert UID to string
+  for (uint8_t i = 0; i < uid_length; i++) {
+    uid_str += std::to_string(uid[i]);
+    if (i < uid_length - 1) {
+      uid_str += " ";
     }
   }
-  return fifo_output;
+
+  // Convert FIFO data to string
+  for (uint8_t i = 0; i < this->fifo_data_length_; i++) {
+    fifo_str += std::to_string(this->fifo_data_[i]);
+    if (i < this->fifo_data_length_ - 1) {
+      fifo_str += " ";
+    }
+  }
+
+  // Return as a list
+  return {uid_str, fifo_str};
 }
 
 // Implementing pure virtual methods from RC522
