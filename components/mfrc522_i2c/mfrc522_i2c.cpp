@@ -11,15 +11,9 @@ enum MFRC522_Register {
   FIFODataReg = 0x09,       // FIFO data register
   FIFOLevelReg = 0x0A,      // FIFO level register
   ControlReg = 0x0C,        // Control register
-  UIDStartReg = 0x20,       // Example register for UID start (adjust if necessary)
-  UIDSizeReg = 0x21         // Example register for UID length (adjust if necessary)
+  UIDStartReg = 0x20,       // Register for UID start
+  UIDSizeReg = 0x21         // Register for UID length
 };
-
-// Dump configuration details
-void MFRC522I2C::dump_config() {
-  RC522::dump_config();
-  LOG_I2C_DEVICE(this);
-}
 
 // Called when a tag is scanned
 void MFRC522I2C::on_scan() {
@@ -107,6 +101,16 @@ void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
 // Writes multiple uint8_ts to a specified register
 void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
   this->write_bytes(reg >> 1, values, count);
+}
+
+// Returns the UID value (x_)
+uint32_t MFRC522I2C::get_x() const {
+  return this->x_;
+}
+
+// Returns the FIFO data string (y_)
+std::string MFRC522I2C::get_y() const {
+  return this->y_;
 }
 
 }  // namespace mfrc522_i2c
