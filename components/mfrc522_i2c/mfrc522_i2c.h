@@ -7,12 +7,10 @@
 namespace esphome {
 namespace mfrc522_i2c {
 
-enum PcdRegister {
-  CommandReg = 0x0D,
-  FIFODataReg = 0x09,
-  ControlReg = 0x0C,
-  // Add more registers as needed
-};
+// Define register addresses as constants
+static const uint8_t COMMAND_REG = 0x0D;
+static const uint8_t FIFO_DATA_REG = 0x09;
+static const uint8_t CONTROL_REG = 0x0C;
 
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
@@ -23,10 +21,10 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   bool read_atqa(uint16_t *atqa);
 
  protected:
-  uint8_t pcd_read_register(PcdRegister reg) override;
-  void pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
-  void pcd_write_register(PcdRegister reg, uint8_t value) override;
-  void pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) override;
+  uint8_t pcd_read_register(uint8_t reg) override;
+  void pcd_read_register(uint8_t reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
+  void pcd_write_register(uint8_t reg, uint8_t value) override;
+  void pcd_write_register(uint8_t reg, uint8_t count, uint8_t *values) override;
 };
 
 }  // namespace mfrc522_i2c

@@ -1,13 +1,14 @@
 #include "mfrc522_i2c.h"
 #include "esphome/core/log.h"
-#include <string>
 
 namespace esphome {
 namespace mfrc522_i2c {
 
-using esphome::rc522::RC522::PcdRegister;
-
 static const char *const TAG = "mfrc522_i2c";
+
+// Define register addresses as integers
+static const uint8_t COMMAND_REG = 0x01 << 1;
+static const uint8_t FIFO_DATA_REG = 0x09 << 1;
 
 void MFRC522I2C::dump_config() {
   RC522::dump_config();
@@ -15,34 +16,34 @@ void MFRC522I2C::dump_config() {
 }
 
 bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
-  // Send Anti-collision command using existing enum
-  this->pcd_write_register(PcdRegister::CommandReg, 0x93);  // PCD_Anticoll (0x93)
+  // Use integer register addresses
+  this->pcd_write_register(COMMAND_REG, 0x93);  // PCD_Anticoll (0x93)
   
-  // Read UID from FIFODataReg using existing enum
+  // Read UID from FIFODataReg
   *uid_length = 5;  // Assuming a 5-byte UID
-  this->pcd_read_register(PcdRegister::FIFODataReg, *uid_length, uid, 0);
+  this->pcd_read_register(FIFO_DATA_REG, *uid_length, uid, 0);
 
   ESP_LOGI(TAG, "UID: %s", format_hex_pretty(uid, *uid_length).c_str());
   return true;
 }
 
 bool MFRC522I2C::read_sak(uint8_t *sak) {
-  // Send SELECT command using existing enum
-  this->pcd_write_register(PcdRegister::CommandReg, 0x70);  // PCD_Select (0x70)
+  // Use integer register addresses
+  this->pcd_write_register(COMMAND_REG, 0x70);  // PCD_Select (0x70)
 
-  // Read SAK from FIFODataReg using existing enum
-  *sak = this->pcd_read_register(PcdRegister::FIFODataReg);
+  // Read SAK from FIFODataReg
+  *sak = this->pcd_read_register(FIFO_DATA_REG);
   ESP_LOGI(TAG, "SAK: 0x%02X", *sak);
   return true;
 }
 
 bool MFRC522I2C::read_atqa(uint16_t *atqa) {
-  // Send REQA command using existing enum
-  this->pcd_write_register(PcdRegister::CommandReg, 0x26);  // PCD_REQA (0x26)
+  // Use integer register addresses
+  this->pcd_write_register(COMMAND_REG, 0x26);  // PCD_REQA (0x26)
 
-  // Read ATQA from FIFODataReg using existing enum
+  // Read ATQA from FIFODataReg
   uint8_t atqa_buf[2] = {0};
-  this->pcd_read_register(PcdRegister::FIFODataReg, 2, atqa_buf, 0);
+  this->pcd_read_register(FIFO_DATA_REG, 2, atqa_buf, 0);
   *atqa = (atqa_buf[0] << 8) | atqa_buf[1];
 
   ESP_LOGI(TAG, "ATQA: 0x%04X", *atqa);
