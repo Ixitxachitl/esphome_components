@@ -7,13 +7,6 @@
 namespace esphome {
 namespace mfrc522_i2c {
 
-enum PcdRegister {
-  CommandReg = 0x0D,
-  FIFODataReg = 0x09,
-  ControlReg = 0x0C,
-  // Add more registers as needed
-};
-
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
   void dump_config() override;
@@ -22,14 +15,11 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   bool read_sak(uint8_t *sak);
   bool read_atqa(uint16_t *atqa);
 
-  // Add the reset function
-  void pcd_reset_();
-
  protected:
-  uint8_t pcd_read_register(PcdRegister reg) override;
-  void pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
-  void pcd_write_register(PcdRegister reg, uint8_t value) override;
-  void pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) override;
+  uint8_t pcd_read_register(rc522::RC522::PcdRegister reg) override;
+  void pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
+  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) override;
+  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) override;
 };
 
 }  // namespace mfrc522_i2c
