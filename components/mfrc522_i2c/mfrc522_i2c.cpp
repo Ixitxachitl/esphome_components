@@ -28,34 +28,37 @@ void MFRC522I2C::on_scan() {
 }
 
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  // Example: Adjust to use a generic read for UID
-  uint8_t uid_length = this->pcd_read_register(0x00);  // Replace with correct register for UID length
+  // Use CollReg to check collision status for UID read
+  this->pcd_write_register(rc522::RC522::CollReg, 0x80);  // Enable collision detection
+  
+  // Read the UID from FIFODataReg
+  uint8_t uid_length = this->pcd_read_register(rc522::RC522::FIFOLevelReg);  // Get the number of bytes in FIFO
   if (uid_length > 0) {
-    this->pcd_read_register(0x01, uid_length, uid, 0);  // Replace with correct register for UID data
+    this->pcd_read_register(rc522::RC522::FIFODataReg, uid_length, uid, 0);  // Read UID data
   }
   return uid_length;
 }
 
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
-    this->pcd_read_register(0x02, count, this->fifo_data_, 0);  // Replace with correct FIFO register
+    this->pcd_read_register(rc522::RC522::FIFODataReg, count, this->fifo_data_, 0);  // Read FIFO data
     this->fifo_data_length_ = count;
   }
 }
 
-uint8_t MFRC522I2C::pcd_read_register(uint8_t reg) {
+uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value;
-  if (!this->read_byte(reg, &value))
+  if (!this->read_byte(static_cast<uint8_t>(reg), &value))
     return 0;
   ESP_LOGVV(TAG, "read_register_(%x) -> %u", reg, value);
   return value;
 }
 
-void MFRC522I2C::pcd_read_register(uint8_t reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
+void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
   if (count == 0) return;
 
   uint8_t b = values[0];
-  this->read_bytes(reg, values, count);
+  this->read_bytes(static_cast<uint8_t>(reg), values, count);
 
   if (rx_align) {
     uint8_t mask = 0xFF << rx_align;
@@ -63,12 +66,12 @@ void MFRC522I2C::pcd_read_register(uint8_t reg, uint8_t count, uint8_t *values, 
   }
 }
 
-void MFRC522I2C::pcd_write_register(uint8_t reg, uint8_t value) {
-  this->write_byte(reg, value);
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) {
+  this->write_byte(static_cast<uint8_t>(reg), value);
 }
 
-void MFRC522I2C::pcd_write_register(uint8_t reg, uint8_t count, uint8_t *values) {
-  this->write_bytes(reg, values, count);
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) {
+  this->write_bytes(static_cast<uint8_t>(reg), values, count);
 }
 
 }  // namespace mfrc522_i2c
