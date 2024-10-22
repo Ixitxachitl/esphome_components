@@ -11,7 +11,7 @@ void MFRC522I2C::dump_config() {
   LOG_I2C_DEVICE(this);
 }
 
-uint8_t MFRC522I2C::pcd_read_register(rc522::PcdRegister reg) {
+uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value;
   if (!read_byte(reg >> 1, &value))
     return 0;
@@ -19,7 +19,7 @@ uint8_t MFRC522I2C::pcd_read_register(rc522::PcdRegister reg) {
   return value;
 }
 
-void MFRC522I2C::pcd_read_register(rc522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
+void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
   if (count == 0) {
     return;
   }
@@ -33,11 +33,11 @@ void MFRC522I2C::pcd_read_register(rc522::PcdRegister reg, uint8_t count, uint8_
   }
 }
 
-void MFRC522I2C::pcd_write_register(rc522::PcdRegister reg, uint8_t value) {
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) {
   this->write_byte(reg >> 1, value);
 }
 
-void MFRC522I2C::pcd_write_register(rc522::PcdRegister reg, uint8_t count, uint8_t *values) {
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) {
   write_bytes(reg >> 1, values, count);
 }
 
@@ -46,7 +46,7 @@ std::string MFRC522I2C::get_uid() {
   uint8_t buffer_size = sizeof(buffer);
 
   // Use the RC522 method to read the card UID
-  if (this->request_tag(rc522::PICC_CMD_REQA) && this->anti_collision(buffer, &buffer_size)) {
+  if (this->request_tag(rc522::RC522::PICC_CMD_REQA) && this->anti_collision(buffer, &buffer_size)) {
     this->uid_ = "";
     for (uint8_t i = 0; i < buffer_size; i++) {
       char hex[3];
@@ -62,11 +62,11 @@ std::string MFRC522I2C::get_uid() {
 }
 
 std::string MFRC522I2C::get_fifo_data_string() {
-  uint8_t fifo_size = this->pcd_read_register(rc522::PcdRegister::FIFOLevelReg);
+  uint8_t fifo_size = this->pcd_read_register(rc522::RC522::FIFOLevelReg);
   uint8_t buffer[fifo_size];
 
   // Read FIFO data
-  this->pcd_read_register(rc522::PcdRegister::FIFODataReg, fifo_size, buffer, 0);
+  this->pcd_read_register(rc522::RC522::FIFODataReg, fifo_size, buffer, 0);
 
   this->fifo_data_ = "";
   for (uint8_t i = 0; i < fifo_size; i++) {
@@ -80,12 +80,12 @@ std::string MFRC522I2C::get_fifo_data_string() {
   return this->fifo_data_;
 }
 
-bool MFRC522I2C::request_tag(rc522::PICC_Command command) {
+bool MFRC522I2C::request_tag(rc522::RC522::PICC_Command command) {
   // Send a command to request a tag
-  this->pcd_write_register(rc522::PcdRegister::CommandReg, command);
+  this->pcd_write_register(rc522::RC522::CommandReg, command);
 
   // Wait for a response
-  uint8_t status = this->pcd_read_register(rc522::PcdRegister::Status1Reg);
+  uint8_t status = this->pcd_read_register(rc522::RC522::Status1Reg);
   if (status & 0x01) { // Status register bit 0 indicates if a tag is present
     return true;
   } else {
@@ -96,10 +96,10 @@ bool MFRC522I2C::request_tag(rc522::PICC_Command command) {
 
 bool MFRC522I2C::anti_collision(uint8_t *buffer, uint8_t *buffer_size) {
   // Perform anti-collision procedure to detect and select a tag
-  this->pcd_write_register(rc522::PcdRegister::BitFramingReg, 0x00);
+  this->pcd_write_register(rc522::RC522::BitFramingReg, 0x00);
 
   // Read UID bytes
-  this->pcd_read_register(rc522::PcdRegister::FIFODataReg, *buffer_size, buffer, 0);
+  this->pcd_read_register(rc522::RC522::FIFODataReg, *buffer_size, buffer, 0);
 
   if (*buffer_size > 0) {
     return true;
