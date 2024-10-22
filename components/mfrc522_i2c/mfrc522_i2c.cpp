@@ -81,15 +81,32 @@ std::string MFRC522I2C::get_fifo_data_string() {
 }
 
 bool MFRC522I2C::request_tag(rc522::RC522::PICC_Command command) {
-  // Implementation of request_tag to send request command
-  // Placeholder implementation
-  return true;
+  // Send a command to request a tag
+  this->pcd_write_register(rc522::RC522::CommandReg, command);
+
+  // Wait for a response
+  uint8_t status = this->pcd_read_register(rc522::RC522::Status1Reg);
+  if (status & 0x01) { // Status register bit 0 indicates if a tag is present
+    return true;
+  } else {
+    ESP_LOGW(TAG, "No tag detected");
+    return false;
+  }
 }
 
 bool MFRC522I2C::anti_collision(uint8_t *buffer, uint8_t *buffer_size) {
-  // Implementation of anti_collision to handle collision detection
-  // Placeholder implementation
-  return true;
+  // Perform anti-collision procedure to detect and select a tag
+  this->pcd_write_register(rc522::RC522::BitFramingReg, 0x00);
+
+  // Read UID bytes
+  this->pcd_read_register(rc522::RC522::FIFODataReg, *buffer_size, buffer, 0);
+
+  if (*buffer_size > 0) {
+    return true;
+  } else {
+    ESP_LOGW(TAG, "Anti-collision failed");
+    return false;
+  }
 }
 
 }  // namespace mfrc522_i2c
