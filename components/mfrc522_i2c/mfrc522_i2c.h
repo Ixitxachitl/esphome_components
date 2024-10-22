@@ -11,19 +11,16 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
   void dump_config() override;
 
-  uint8_t pcd_read_register(rc522::RC522::PcdRegister reg);
-  void pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align);
-  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value);
-  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values);
-
-  std::string get_uid();
-  std::string get_fifo_data_string();
-  bool request_tag(rc522::RC522::PiccCommand command);
-  bool anti_collision(uint8_t *buffer, uint8_t *buffer_size);
+  // Add new methods for reading more tag data
+  bool read_full_uid(uint8_t *uid, uint8_t *uid_length);
+  bool read_sak(uint8_t *sak);
+  bool read_atqa(uint16_t *atqa);
 
  protected:
-  std::string uid_;
-  std::string fifo_data_;
+  uint8_t pcd_read_register(PcdRegister reg) override;
+  void pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
+  void pcd_write_register(PcdRegister reg, uint8_t value) override;
+  void pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) override;
 };
 
 }  // namespace mfrc522_i2c
