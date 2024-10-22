@@ -11,7 +11,7 @@ void MFRC522I2C::dump_config() {
   LOG_I2C_DEVICE(this);
 }
 
-uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
+uint8_t MFRC522I2C::pcd_read_register(rc522::PcdRegister reg) {
   uint8_t value;
   if (!read_byte(reg >> 1, &value))
     return 0;
@@ -19,7 +19,7 @@ uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
   return value;
 }
 
-void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
+void MFRC522I2C::pcd_read_register(rc522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
   if (count == 0) {
     return;
   }
@@ -33,11 +33,11 @@ void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *valu
   }
 }
 
-void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
+void MFRC522I2C::pcd_write_register(rc522::PcdRegister reg, uint8_t value) {
   this->write_byte(reg >> 1, value);
 }
 
-void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
+void MFRC522I2C::pcd_write_register(rc522::PcdRegister reg, uint8_t count, uint8_t *values) {
   write_bytes(reg >> 1, values, count);
 }
 
