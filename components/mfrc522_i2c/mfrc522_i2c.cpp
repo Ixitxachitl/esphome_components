@@ -13,7 +13,7 @@ void MFRC522I2C::dump_config() {
 
 uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value;
-  if (!read_byte(reg >> 1, &value))
+  if (!read_byte(static_cast<uint8_t>(reg), &value))
     return 0;
   ESP_LOGVV(TAG, "read_register_(%x) -> %u", reg, value);
   return value;
@@ -25,7 +25,7 @@ void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count,
   }
 
   uint8_t b = values[0];
-  read_bytes(reg >> 1, values, count);
+  read_bytes(static_cast<uint8_t>(reg), values, count);
 
   if (rx_align) {
     uint8_t mask = 0xFF << rx_align;
@@ -34,11 +34,11 @@ void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count,
 }
 
 void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) {
-  this->write_byte(reg >> 1, value);
+  this->write_byte(static_cast<uint8_t>(reg), value);
 }
 
 void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) {
-  write_bytes(reg >> 1, values, count);
+  write_bytes(static_cast<uint8_t>(reg), values, count);
 }
 
 std::string MFRC522I2C::get_uid() {
@@ -82,7 +82,7 @@ std::string MFRC522I2C::get_fifo_data_string() {
 
 bool MFRC522I2C::request_tag(rc522::RC522::PICC_Command command) {
   // Send a command to request a tag
-  this->pcd_write_register(rc522::RC522::PcdRegister::CommandReg, command);
+  this->pcd_write_register(rc522::RC522::PcdRegister::CommandReg, static_cast<uint8_t>(command));
 
   // Wait for a response
   uint8_t status = this->pcd_read_register(rc522::RC522::PcdRegister::Status1Reg);
