@@ -7,19 +7,40 @@ namespace mfrc522_i2c {
 static const char *const TAG = "mfrc522_i2c";
 
 void MFRC522I2C::setup() {
-  // Initialize the MFRC522 chip
-  this->pcd_reset_();  // Soft reset
-  this->pcd_antenna_on_();  // Turn on the antenna
-  ESP_LOGI(TAG, "MFRC522 setup complete.");
+  this->pcd_reset_();  // Reset the device
+  delay(50);  // Wait for reset to complete
+  this->pcd_antenna_on_();  // Activate antenna
+  ESP_LOGI(TAG, "Antenna activated and setup complete.");
 }
 
 void MFRC522I2C::loop() {
-  // Add any periodic tasks here, if needed
-}
+  static uint32_t last_run = 0;
+  // Run every 2 seconds to allow for sufficient communication time
+  if (millis() - last_run < 2000) return;
+  last_run = millis();
 
-void MFRC522I2C::dump_config() {
-  RC522::dump_config();
-  LOG_I2C_DEVICE(this);
+  uint8_t uid[10] = {0};
+  uint8_t uid_length = 0;
+  uint8_t sak = 0;
+  uint16_t atqa = 0;
+
+  if (this->read_full_uid(uid, &uid_length)) {
+    ESP_LOGI(TAG, "Tag detected: %s", format_hex_pretty(uid, uid_length).c_str());
+
+    if (this->read_sak(&sak)) {
+      ESP_LOGI(TAG, "SAK: 0x%02X", sak);
+    } else {
+      ESP_LOGW(TAG, "Failed to read SAK.");
+    }
+
+    if (this->read_atqa(&atqa)) {
+      ESP_LOGI(TAG, "ATQA: 0x%04X", atqa);
+    } else {
+      ESP_LOGW(TAG, "Failed to read ATQA.");
+    }
+  } else {
+    ESP_LOGD(TAG, "No tag detected.");
+  }
 }
 
 uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
@@ -27,6 +48,7 @@ uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   if (!this->read_byte(static_cast<uint8_t>(reg), &value)) {
     ESP_LOGW(TAG, "Failed to read register 0x%02X", reg);
   }
+  delay(5);  // Add delay to stabilize I2C communication
   return value;
 }
 
@@ -39,39 +61,57 @@ void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count,
     uint8_t mask = 0xFF << rx_align;
     values[0] &= mask;
   }
+  delay(5);  // Add delay after read operation
 }
 
 void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) {
   if (!this->write_byte(static_cast<uint8_t>(reg), value)) {
     ESP_LOGW(TAG, "Failed to write 0x%02X to register 0x%02X", value, reg);
   }
+  delay(5);  // Add delay to stabilize I2C communication
 }
 
 void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) {
   if (!this->write_bytes(static_cast<uint8_t>(reg), values, count)) {
     ESP_LOGW(TAG, "Failed to write %d bytes to register 0x%02X", count, reg);
   }
+  delay(5);  // Add delay after write operation
 }
 
 bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
   this->pcd_write_register(rc522::RC522::PcdRegister::COMMAND_REG, 0x93);  // Anticollision command
   *uid_length = 5;
   this->pcd_read_register(rc522::RC522::PcdRegister::FIFO_DATA_REG, *uid_length, uid, 0);
-  return *uid_length != 0;
+
+  if (*uid_length == 0) {
+    ESP_LOGW(TAG, "Failed to read UID.");
+    return false;
+  }
+  return true;
 }
 
 bool MFRC522I2C::read_sak(uint8_t *sak) {
   this->pcd_write_register(rc522::RC522::PcdRegister::COMMAND_REG, 0x70);  // Select command
   *sak = this->pcd_read_register(rc522::RC522::PcdRegister::FIFO_DATA_REG);
-  return *sak != 0;
+
+  if (*sak == 0) {
+    ESP_LOGW(TAG, "Failed to read SAK.");
+    return false;
+  }
+  return true;
 }
 
 bool MFRC522I2C::read_atqa(uint16_t *atqa) {
   this->pcd_write_register(rc522::RC522::PcdRegister::COMMAND_REG, 0x26);  // REQA command
   uint8_t atqa_buf[2] = {0};
   this->pcd_read_register(rc522::RC522::PcdRegister::FIFO_DATA_REG, 2, atqa_buf, 0);
+
+  if (atqa_buf[0] == 0 && atqa_buf[1] == 0) {
+    ESP_LOGW(TAG, "Failed to read ATQA.");
+    return false;
+  }
   *atqa = (atqa_buf[0] << 8) | atqa_buf[1];
-  return *atqa != 0;
+  return true;
 }
 
 }  // namespace mfrc522_i2c
