@@ -80,5 +80,9 @@ std::string MFRC522I2C::get_fifo_data() {
   return this->fifo_data_;
 }
 
+std::string MFRC522I2C::get_fifo_data_string() {
+  return this->get_fifo_data();
+}
+
 }  // namespace mfrc522_i2c
 }  // namespace esphome
