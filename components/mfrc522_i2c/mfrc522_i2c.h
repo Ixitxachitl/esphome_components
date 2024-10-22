@@ -22,6 +22,9 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   bool read_sak(uint8_t *sak);
   bool read_atqa(uint16_t *atqa);
 
+  // Add the reset function
+  void pcd_reset_();
+
  protected:
   uint8_t pcd_read_register(PcdRegister reg) override;
   void pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
