@@ -1,112 +1,61 @@
 #include "mfrc522_i2c.h"
-#include "esphome/core/log.h"
 
 namespace esphome {
 namespace mfrc522_i2c {
 
-static const char *const TAG = "mfrc522_i2c";
-
 void MFRC522I2C::dump_config() {
-  RC522::dump_config();
-  LOG_I2C_DEVICE(this);
+  ESP_LOGCONFIG(TAG, "MFRC522I2C:");
+  ESP_LOGCONFIG(TAG, "  Address: 0x%02X", this->address_);
 }
 
 uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
   uint8_t value;
-  if (!read_byte(static_cast<uint8_t>(reg), &value))
-    return 0;
-  ESP_LOGVV(TAG, "read_register_(%x) -> %u", reg, value);
+  this->read_bytes(reg, &value, 1);
   return value;
 }
 
 void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
-  if (count == 0) {
-    return;
-  }
-
-  uint8_t b = values[0];
-  read_bytes(static_cast<uint8_t>(reg), values, count);
-
-  if (rx_align) {
-    uint8_t mask = 0xFF << rx_align;
-    values[0] = (b & ~mask) | (values[0] & mask);
-  }
+  this->read_bytes(reg, values, count);
 }
 
 void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
-  this->write_byte(static_cast<uint8_t>(reg), value);
+  this->write_bytes(reg, &value, 1);
 }
 
 void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
-  write_bytes(static_cast<uint8_t>(reg), values, count);
+  this->write_bytes(reg, values, count);
 }
 
 std::string MFRC522I2C::get_uid() {
   uint8_t buffer[10];
   uint8_t buffer_size = sizeof(buffer);
-
-  // Use the RC522 method to read the card UID
-  if (this->request_tag(PICC_Command::PICC_CMD_REQA) && this->anti_collision(buffer, &buffer_size)) {
-    this->uid_ = "";
-    for (uint8_t i = 0; i < buffer_size; i++) {
-      char hex[3];
-      snprintf(hex, sizeof(hex), "%02X", buffer[i]);
-      this->uid_ += hex;
-    }
+  if (this->request_tag(PiccCommand::PICC_CMD_REQA) && this->anti_collision(buffer, &buffer_size)) {
+    this->uid_ = std::string(buffer, buffer + buffer_size);
   } else {
-    ESP_LOGW(TAG, "Failed to read UID");
-    this->uid_ = "UNKNOWN";
+    this->uid_.clear();
   }
-
   return this->uid_;
 }
 
 std::string MFRC522I2C::get_fifo_data_string() {
-  uint8_t fifo_size = this->pcd_read_register(PcdRegister::FIFOLevelReg);
-  uint8_t buffer[fifo_size];
-
-  // Read FIFO data
-  this->pcd_read_register(PcdRegister::FIFODataReg, fifo_size, buffer, 0);
-
-  this->fifo_data_ = "";
-  for (uint8_t i = 0; i < fifo_size; i++) {
-    if (buffer[i] >= 32 && buffer[i] <= 126) {
-      this->fifo_data_ += static_cast<char>(buffer[i]);
-    } else {
-      this->fifo_data_ += '.';
-    }
-  }
-
+  uint8_t fifo_size = this->pcd_read_register(PcdRegister::FIFO_LEVEL_REG);
+  uint8_t buffer[64];
+  this->pcd_read_register(PcdRegister::FIFO_DATA_REG, fifo_size, buffer, 0);
+  this->fifo_data_ = std::string(buffer, buffer + fifo_size);
   return this->fifo_data_;
 }
 
-bool MFRC522I2C::request_tag(PICC_Command command) {
-  // Send a command to request a tag
-  this->pcd_write_register(PcdRegister::CommandReg, static_cast<uint8_t>(command));
-
-  // Wait for a response
-  uint8_t status = this->pcd_read_register(PcdRegister::Status1Reg);
-  if (status & 0x01) { // Status register bit 0 indicates if a tag is present
-    return true;
-  } else {
-    ESP_LOGW(TAG, "No tag detected");
-    return false;
-  }
+bool MFRC522I2C::request_tag(PcdCommand command) {
+  this->pcd_write_register(PcdRegister::BIT_FRAMING_REG, 0x07);
+  uint8_t command_buffer[] = {static_cast<uint8_t>(command)};
+  this->pcd_transceive_data_(command_buffer, sizeof(command_buffer));
+  return true;
 }
 
 bool MFRC522I2C::anti_collision(uint8_t *buffer, uint8_t *buffer_size) {
-  // Perform anti-collision procedure to detect and select a tag
-  this->pcd_write_register(PcdRegister::BitFramingReg, 0x00);
-
-  // Read UID bytes
-  this->pcd_read_register(PcdRegister::FIFODataReg, *buffer_size, buffer, 0);
-
-  if (*buffer_size > 0) {
-    return true;
-  } else {
-    ESP_LOGW(TAG, "Anti-collision failed");
-    return false;
-  }
+  this->pcd_write_register(PcdRegister::BIT_FRAMING_REG, 0x00);
+  this->pcd_read_register(PcdRegister::FIFO_DATA_REG, *buffer_size, buffer, 0);
+  return true;
 }
 
 }  // namespace mfrc522_i2c

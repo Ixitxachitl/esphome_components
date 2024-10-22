@@ -1,10 +1,14 @@
 #pragma once
 
+#include "esphome/core/component.h"
+#include "esphome/core/hal.h"
 #include "esphome/components/i2c/i2c.h"
 #include "esphome/components/rc522/rc522.h"
 
 namespace esphome {
 namespace mfrc522_i2c {
+
+using namespace rc522;
 
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
@@ -17,7 +21,8 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
 
   std::string get_uid();
   std::string get_fifo_data_string();
-  bool request_tag(PICC_Command command);
+
+  bool request_tag(PcdCommand command);
   bool anti_collision(uint8_t *buffer, uint8_t *buffer_size);
 
  protected:
