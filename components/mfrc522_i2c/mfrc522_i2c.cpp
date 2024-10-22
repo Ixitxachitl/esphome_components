@@ -25,18 +25,22 @@ void MFRC522I2C::loop() {
   uint16_t atqa = 0;
 
   if (this->read_full_uid(uid, &uid_length)) {
-    ESP_LOGI(TAG, "Tag detected: %s", format_hex_pretty(uid, uid_length).c_str());
+    if (this->validate_data(uid, uid_length)) {
+      ESP_LOGI(TAG, "Tag detected: %s", format_hex_pretty(uid, uid_length).c_str());
 
-    if (this->read_sak(&sak)) {
-      ESP_LOGI(TAG, "SAK: 0x%02X", sak);
-    } else {
-      ESP_LOGW(TAG, "Failed to read SAK.");
-    }
+      if (this->read_sak(&sak)) {
+        ESP_LOGI(TAG, "SAK: 0x%02X", sak);
+      } else {
+        ESP_LOGW(TAG, "Failed to read SAK.");
+      }
 
-    if (this->read_atqa(&atqa)) {
-      ESP_LOGI(TAG, "ATQA: 0x%04X", atqa);
+      if (this->read_atqa(&atqa)) {
+        ESP_LOGI(TAG, "ATQA: 0x%04X", atqa);
+      } else {
+        ESP_LOGW(TAG, "Failed to read ATQA.");
+      }
     } else {
-      ESP_LOGW(TAG, "Failed to read ATQA.");
+      ESP_LOGW(TAG, "Invalid or repeated UID detected.");
     }
   } else {
     ESP_LOGD(TAG, "No tag detected.");
@@ -88,8 +92,8 @@ bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
   *uid_length = 5;
   this->pcd_read_register(rc522::RC522::PcdRegister::FIFO_DATA_REG, *uid_length, uid, 0);
 
-  if (*uid_length == 0) {
-    ESP_LOGW(TAG, "Failed to read UID.");
+  if (*uid_length == 0 || this->is_repeated_data(uid, *uid_length)) {
+    ESP_LOGW(TAG, "Failed to read UID or repeated data detected.");
     return false;
   }
   return true;
@@ -117,6 +121,30 @@ bool MFRC522I2C::read_atqa(uint16_t *atqa) {
   }
   *atqa = (atqa_buf[0] << 8) | atqa_buf[1];
   return true;
+}
+
+bool MFRC522I2C::validate_data(uint8_t *data, uint8_t length) {
+  // Check if all bytes are the same (e.g., 0x22) to filter out static or invalid data
+  for (uint8_t i = 1; i < length; i++) {
+    if (data[i] != data[0]) {
+      return true;  // Valid data
+    }
+  }
+  return false;  // All bytes are the same, likely invalid
+}
+
+bool MFRC522I2C::is_repeated_data(uint8_t *data, uint8_t length) {
+  // Implement additional logic to prevent reading repeated data if necessary
+  static uint8_t last_data[10] = {0};
+  static uint8_t last_length = 0;
+
+  if (length == last_length && memcmp(data, last_data, length) == 0) {
+    return true;  // Data is repeated
+  }
+
+  memcpy(last_data, data, length);
+  last_length = length;
+  return false;  // New data
 }
 
 }  // namespace mfrc522_i2c
