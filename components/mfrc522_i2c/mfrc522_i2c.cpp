@@ -6,10 +6,6 @@ namespace mfrc522_i2c {
 
 static const char *const TAG = "mfrc522_i2c";
 
-// Define register addresses as integers
-static const uint8_t COMMAND_REG = 0x01 << 1;
-static const uint8_t FIFO_DATA_REG = 0x09 << 1;
-
 void MFRC522I2C::dump_config() {
   RC522::dump_config();
   LOG_I2C_DEVICE(this);
@@ -18,7 +14,7 @@ void MFRC522I2C::dump_config() {
 bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
   // Use integer register addresses
   this->pcd_write_register(COMMAND_REG, 0x93);  // PCD_Anticoll (0x93)
-  
+
   // Read UID from FIFODataReg
   *uid_length = 5;  // Assuming a 5-byte UID
   this->pcd_read_register(FIFO_DATA_REG, *uid_length, uid, 0);

@@ -21,10 +21,11 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   bool read_atqa(uint16_t *atqa);
 
  protected:
-  uint8_t pcd_read_register(uint8_t reg) override;
-  void pcd_read_register(uint8_t reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
-  void pcd_write_register(uint8_t reg, uint8_t value) override;
-  void pcd_write_register(uint8_t reg, uint8_t count, uint8_t *values) override;
+  // Remove 'override' since these are not overriding base methods
+  uint8_t pcd_read_register(uint8_t reg);
+  void pcd_read_register(uint8_t reg, uint8_t count, uint8_t *values, uint8_t rx_align);
+  void pcd_write_register(uint8_t reg, uint8_t value);
+  void pcd_write_register(uint8_t reg, uint8_t count, uint8_t *values);
 };
 
 }  // namespace mfrc522_i2c
