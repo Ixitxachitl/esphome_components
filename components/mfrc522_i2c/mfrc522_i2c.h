@@ -25,9 +25,9 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   uint32_t x_;
   std::string y_;
 
-  void on_scan() override;
+  void on_scan();
 
-  // Implement all pure virtual methods from RC522
+  // Implement pure virtual methods from RC522
   uint8_t pcd_read_register(rc522::RC522::PcdRegister reg) override;
   void pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
   void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) override;
