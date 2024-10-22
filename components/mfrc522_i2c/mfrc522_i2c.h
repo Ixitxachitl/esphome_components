@@ -22,7 +22,7 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   void pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) override;
 
  private:
-  bool request_tag(rc522::RC522::PICC_Command command);  // Updated to use rc522::RC522::PICC_Command
+  bool request_tag(rc522::PICC_Command command);  // Updated to use rc522::PICC_Command
   bool anti_collision(uint8_t *buffer, uint8_t *buffer_size);
   std::string uid_;
   std::string fifo_data_;
