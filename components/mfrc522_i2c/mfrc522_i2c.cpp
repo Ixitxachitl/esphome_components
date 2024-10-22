@@ -8,8 +8,7 @@ static const char *const TAG = "mfrc522_i2c";
 
 // Called when a tag is scanned
 void MFRC522I2C::on_scan() {
-  // Read UID and set x_
-  uint8_t uid[10];  // Adjust size based on UID length
+  uint8_t uid[10];
   uint8_t uid_length = this->read_uid(uid);
   if (uid_length > 0) {
     this->x_ = 0;
@@ -21,31 +20,26 @@ void MFRC522I2C::on_scan() {
     ESP_LOGW(TAG, "Failed to read UID");
   }
 
-  // Read FIFO data and set y_
-  this->read_fifo_data(10);  // Adjust the count as needed
+  this->read_fifo_data(10);  // Adjust as needed
   this->y_ = this->get_fifo_data_as_string();
-
   ESP_LOGD(TAG, "FIFO Data (y_): %s", this->y_.c_str());
 }
 
-// Read UID and return its length
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  uint8_t uid_length = this->pcd_read_register(static_cast<MFRC522_LocalRegister>(UIDSizeReg));
+  uint8_t uid_length = this->pcd_read_register(static_cast<PcdRegister>(UIDSizeReg));
   if (uid_length > 0) {
-    this->pcd_read_register(static_cast<MFRC522_LocalRegister>(UIDStartReg), uid_length, uid, 0);
+    this->pcd_read_register(static_cast<PcdRegister>(UIDStartReg), uid_length, uid, 0);
   }
   return uid_length;
 }
 
-// Read FIFO data into a buffer
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
-    this->pcd_read_register(static_cast<MFRC522_LocalRegister>(FIFODataReg), count, this->fifo_data_, 0);
+    this->pcd_read_register(static_cast<PcdRegister>(FIFODataReg), count, this->fifo_data_, 0);
     this->fifo_data_length_ = count;
   }
 }
 
-// Convert FIFO data to a string
 std::string MFRC522I2C::get_fifo_data_as_string() {
   std::string fifo_output;
   for (uint8_t i = 0; i < this->fifo_data_length_; i++) {
@@ -57,34 +51,22 @@ std::string MFRC522I2C::get_fifo_data_as_string() {
   return fifo_output;
 }
 
-// Return the UID value (x_)
-uint32_t MFRC522I2C::get_x() const {
-  return this->x_;
+uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
+  uint8_t value;
+  rc522::RC522::pcd_read_register(reg, 1, &value, 0);
+  return value;
 }
 
-// Return the FIFO data string (y_)
-std::string MFRC522I2C::get_y() const {
-  return this->y_;
+void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
+  rc522::RC522::pcd_read_register(reg, count, values, rx_align);
 }
 
-// Wrapper for reading a single register
-uint8_t MFRC522I2C::pcd_read_register(MFRC522_LocalRegister reg) {
-  return rc522::RC522::pcd_read_register(static_cast<rc522::RC522::PcdRegister>(reg));
+void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
+  rc522::RC522::pcd_write_register(reg, value);
 }
 
-// Wrapper for reading multiple registers
-void MFRC522I2C::pcd_read_register(MFRC522_LocalRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
-  rc522::RC522::pcd_read_register(static_cast<rc522::RC522::PcdRegister>(reg), count, values, rx_align);
-}
-
-// Wrapper for writing a single register
-void MFRC522I2C::pcd_write_register(MFRC522_LocalRegister reg, uint8_t value) {
-  rc522::RC522::pcd_write_register(static_cast<rc522::RC522::PcdRegister>(reg), value);
-}
-
-// Wrapper for writing multiple registers
-void MFRC522I2C::pcd_write_register(MFRC522_LocalRegister reg, uint8_t count, uint8_t *values) {
-  rc522::RC522::pcd_write_register(static_cast<rc522::RC522::PcdRegister>(reg), count, values);
+void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
+  rc522::RC522::pcd_write_register(reg, count, values);
 }
 
 }  // namespace mfrc522_i2c
