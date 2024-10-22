@@ -6,17 +6,42 @@ namespace mfrc522_i2c {
 
 static const char *const TAG = "mfrc522_i2c";
 
-void MFRC522I2C::dump_config() {
-  RC522::dump_config();
-  LOG_I2C_DEVICE(this);
+// Called when a tag is scanned
+void MFRC522I2C::on_scan() {
+  // Set x to the tag ID using your logic
+  this->x_ = pcd_read_register(PcdRegister::TagIDReg);  // Replace with your actual tag ID register
+
+  // Read FIFO data and set y
+  read_fifo_data(10);  // Adjust the count as needed
+  this->y_ = get_fifo_data_as_string();  // Store FIFO data as a string
+
+  ESP_LOGD(TAG, "Tag ID (x): %u", this->x_);
+  ESP_LOGD(TAG, "FIFO Data (y): %s", this->y_.c_str());
 }
 
-/**
- * Reads a uint8_t from the specified register in the MFRC522 chip.
- * The interface is described in the datasheet section 8.1.2.
- */
-uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg  ///< The register to read from. One of the PCD_Register enums.
-) {
+// Reads data from the FIFO buffer
+void MFRC522I2C::read_fifo_data(uint8_t count) {
+  if (count > 0 && count <= MAX_FIFO_SIZE) {
+    // Read FIFODataReg for count bytes
+    pcd_read_register(PcdRegister::FIFODataReg, count, this->fifo_data_, 0);
+    this->fifo_data_length_ = count;
+  }
+}
+
+// Converts FIFO data to a string (y)
+std::string MFRC522I2C::get_fifo_data_as_string() {
+  std::string fifo_output;
+  for (uint8_t i = 0; i < this->fifo_data_length_; i++) {
+    fifo_output += std::to_string(this->fifo_data_[i]);
+    if (i < this->fifo_data_length_ - 1) {
+      fifo_output += " ";
+    }
+  }
+  return fifo_output;
+}
+
+// Reads a uint8_t from a specified register in the MFRC522 chip
+uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
   uint8_t value;
   if (!read_byte(reg >> 1, &value))
     return 0;
@@ -24,15 +49,8 @@ uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg  ///< The register to read
   return value;
 }
 
-/**
- * Reads a number of uint8_ts from the specified register in the MFRC522 chip.
- * The interface is described in the datasheet section 8.1.2.
- */
-void MFRC522I2C::pcd_read_register(PcdRegister reg,  ///< The register to read from. One of the PCD_Register enums.
-                                 uint8_t count,    ///< The number of uint8_ts to read
-                                 uint8_t *values,  ///< uint8_t array to store the values in.
-                                 uint8_t rx_align  ///< Only bit positions rxAlign..7 in values[0] are updated.
-) {
+// Reads multiple uint8_ts from a specified register
+void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
   if (count == 0) {
     return;
   }
@@ -40,31 +58,21 @@ void MFRC522I2C::pcd_read_register(PcdRegister reg,  ///< The register to read f
   uint8_t b = values[0];
   read_bytes(reg >> 1, values, count);
 
-  if (rx_align)  // Only update bit positions rxAlign..7 in values[0]
-  {
-    // Create bit mask for bit positions rxAlign..7
+  if (rx_align) {
     uint8_t mask = 0xFF << rx_align;
-    // Apply mask to both current value of values[0] and the new data in values array.
     values[0] = (b & ~mask) | (values[0] & mask);
   }
 }
 
-void MFRC522I2C::pcd_write_register(PcdRegister reg,  ///< The register to write to. One of the PCD_Register enums.
-                                  uint8_t value     ///< The value to write.
-) {
+// Writes a uint8_t to a specified register in the MFRC522 chip
+void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
   this->write_byte(reg >> 1, value);
 }
 
-/**
- * Writes a number of uint8_ts to the specified register in the MFRC522 chip.
- * The interface is described in the datasheet section 8.1.2.
- */
-void MFRC522I2C::pcd_write_register(PcdRegister reg,  ///< The register to write to. One of the PCD_Register enums.
-                                  uint8_t count,    ///< The number of uint8_ts to write to the register
-                                  uint8_t *values   ///< The values to write. uint8_t array.
-) {
+// Writes multiple uint8_ts to a specified register
+void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
   write_bytes(reg >> 1, values, count);
 }
 
-}  // namespace rc522_i2c
+}  // namespace mfrc522_i2c
 }  // namespace esphome
