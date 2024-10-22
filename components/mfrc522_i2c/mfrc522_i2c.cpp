@@ -43,6 +43,11 @@ void MFRC522I2C::loop() {
   }
 }
 
+void MFRC522I2C::dump_config() {
+  ESP_LOGCONFIG(TAG, "MFRC522I2C:");
+  LOG_I2C_DEVICE(this);
+}
+
 uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value = 0;
   if (!this->read_byte(static_cast<uint8_t>(reg), &value)) {
