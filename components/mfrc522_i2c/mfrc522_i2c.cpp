@@ -25,6 +25,7 @@ void MFRC522I2C::on_scan() {
   ESP_LOGD(TAG, "FIFO Data (y_): %s", this->y_.c_str());
 }
 
+// Read UID and return its length
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
   uint8_t uid_length = this->pcd_read_register(static_cast<PcdRegister>(UIDSizeReg));
   if (uid_length > 0) {
@@ -33,6 +34,7 @@ uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
   return uid_length;
 }
 
+// Read FIFO data into a buffer
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
     this->pcd_read_register(static_cast<PcdRegister>(FIFODataReg), count, this->fifo_data_, 0);
@@ -40,6 +42,7 @@ void MFRC522I2C::read_fifo_data(uint8_t count) {
   }
 }
 
+// Convert FIFO data to a string
 std::string MFRC522I2C::get_fifo_data_as_string() {
   std::string fifo_output;
   for (uint8_t i = 0; i < this->fifo_data_length_; i++) {
@@ -51,6 +54,7 @@ std::string MFRC522I2C::get_fifo_data_as_string() {
   return fifo_output;
 }
 
+// Implement the pure virtual methods from RC522
 uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
   uint8_t value;
   rc522::RC522::pcd_read_register(reg, 1, &value, 0);
