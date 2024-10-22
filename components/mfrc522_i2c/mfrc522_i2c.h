@@ -7,7 +7,7 @@
 namespace esphome {
 namespace mfrc522_i2c {
 
-static const uint8_t MAX_FIFO_SIZE = 64;  // Maximum size of the FIFO buffer
+static const uint8_t MAX_FIFO_SIZE = 64;
 
 enum MFRC522_LocalRegister : uint8_t {
   FIFODataReg = 0x09,
@@ -21,9 +21,9 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
   MFRC522I2C() : x_(0), y_("") {}
 
-  // Public variables for direct access
-  uint32_t x_;
-  std::string y_;
+  // These functions return x_ and y_ directly
+  uint32_t get_x() const { return x_; }
+  std::string get_y() const { return y_; }
 
   void on_scan();
 
@@ -39,6 +39,8 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
   std::string get_fifo_data_as_string();
 
  private:
+  uint32_t x_;
+  std::string y_;
   uint8_t fifo_data_[MAX_FIFO_SIZE];
   uint8_t fifo_data_length_;
 };
