@@ -6,6 +6,15 @@ namespace mfrc522_i2c {
 
 static const char *const TAG = "mfrc522_i2c";
 
+// Define register constants specific to MFRC522
+enum MFRC522_Register {
+  FIFODataReg = 0x09,       // FIFO data register
+  FIFOLevelReg = 0x0A,      // FIFO level register
+  ControlReg = 0x0C,        // Control register
+  UIDStartReg = 0x20,       // Example register for UID start (adjust if necessary)
+  UIDSizeReg = 0x21         // Example register for UID length (adjust if necessary)
+};
+
 // Dump configuration details
 void MFRC522I2C::dump_config() {
   RC522::dump_config();
@@ -37,10 +46,11 @@ void MFRC522I2C::on_scan() {
 
 // Reads the UID from the MFRC522 and returns its length
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  // Adjust this logic to match the actual UID reading process for MFRC522
-  uint8_t uid_length = this->pcd_read_register(PcdRegister::UIDLengthReg);  // Adjust register
+  // Read the UID size from the UIDSizeReg
+  uint8_t uid_length = this->pcd_read_register(static_cast<PcdRegister>(MFRC522_Register::UIDSizeReg));
   if (uid_length > 0) {
-    this->pcd_read_register(PcdRegister::UIDDataReg, uid_length, uid, 0);  // Adjust register
+    // Read UID data from UIDStartReg
+    this->pcd_read_register(static_cast<PcdRegister>(MFRC522_Register::UIDStartReg), uid_length, uid, 0);
   }
   return uid_length;
 }
@@ -48,7 +58,7 @@ uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
 // Reads FIFO data into a buffer and converts it to a string
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
-    this->pcd_read_register(PcdRegister::FIFODataReg, count, this->fifo_data_, 0);  // Adjust register
+    this->pcd_read_register(static_cast<PcdRegister>(MFRC522_Register::FIFODataReg), count, this->fifo_data_, 0);
     this->fifo_data_length_ = count;
   }
 }
