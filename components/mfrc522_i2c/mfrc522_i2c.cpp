@@ -9,18 +9,20 @@ static const char *const TAG = "mfrc522_i2c";
 void MFRC522I2C::on_scan() {
   uint8_t uid[10];
   uint8_t uid_length = this->read_uid(uid);
-  this->read_fifo_data(10);  // Adjust the count as needed
+  this->read_fifo_data(10);  // Adjust count as needed
 
-  // Convert UID and FIFO data into a list and assign to x_
+  // Convert UID and FIFO data into a list and store in x
   this->x = this->convert_to_list(uid, uid_length);
 
-  ESP_LOGD(TAG, "Combined Data List (x): [UID: %s, FIFO: %s]", this->x[0].c_str(), this->x[1].c_str());
+  ESP_LOGD(TAG, "UID: %s, FIFO Data: %s", this->x[0].c_str(), this->x[1].c_str());
 }
 
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  uint8_t uid_length = this->pcd_read_register(rc522::RC522::VersionReg);  // Placeholder for UID length register
+  // Read the UID length (adjust register as needed)
+  uint8_t uid_length = this->pcd_read_register(rc522::RC522::ComIrqReg);  // Example placeholder
   if (uid_length > 0) {
-    this->pcd_read_register(rc522::RC522::ModeReg, uid_length, uid, 0);  // Placeholder for UID data register
+    // Read UID data (adjust register as needed)
+    this->pcd_read_register(rc522::RC522::FIFOLevelReg, uid_length, uid, 0);  // Example placeholder
   }
   return uid_length;
 }
@@ -51,7 +53,6 @@ std::vector<std::string> MFRC522I2C::convert_to_list(const uint8_t *uid, uint8_t
     }
   }
 
-  // Return as a list
   return {uid_str, fifo_str};
 }
 
