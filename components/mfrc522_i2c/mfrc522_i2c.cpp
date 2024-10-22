@@ -7,7 +7,9 @@ namespace mfrc522_i2c {
 static const char *const TAG = "mfrc522_i2c";
 
 // Constructor (using default)
-MFRC522I2C::MFRC522I2C() = default;
+MFRC522I2C::MFRC522I2C() {
+  this->x.resize(2);  // Ensure x has two elements
+}
 
 // Called when a tag is scanned
 void MFRC522I2C::on_scan() {
@@ -29,8 +31,7 @@ void MFRC522I2C::on_scan() {
 
 // Reads the UID from the MFRC522 and returns its length
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  // Example register read for UID length (adjust registers as needed)
-  uint8_t uid_length = this->pcd_read_register(rc522::RC522::VersionReg);
+  uint8_t uid_length = this->pcd_read_register(rc522::RC522::VersionReg);  // Example register read
   if (uid_length > 0) {
     this->pcd_read_register(rc522::RC522::ModeReg, uid_length, uid, 0);
   }
@@ -45,15 +46,6 @@ void MFRC522I2C::read_fifo_data(uint8_t count) {
   }
 }
 
-// Converts the UID data to a list of strings
-std::vector<std::string> MFRC522I2C::convert_to_list(const uint8_t *data, uint8_t length) {
-  std::vector<std::string> output;
-  for (uint8_t i = 0; i < length; i++) {
-    output.push_back(std::to_string(data[i]));
-  }
-  return output;
-}
-
 // Implement the pure virtual functions from RC522
 uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value;
@@ -64,9 +56,7 @@ uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
 }
 
 void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
-  if (count == 0) {
-    return;
-  }
+  if (count == 0) return;
 
   uint8_t b = values[0];
   this->read_bytes(reg >> 1, values, count);

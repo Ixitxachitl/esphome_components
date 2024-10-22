@@ -13,7 +13,7 @@ static const uint8_t MAX_FIFO_SIZE = 64;
 
 class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
-  MFRC522I2C() = default;
+  MFRC522I2C();
 
   void on_scan();
 
@@ -29,7 +29,6 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  protected:
   uint8_t read_uid(uint8_t *uid);
   void read_fifo_data(uint8_t count);
-  std::vector<std::string> convert_to_list(const uint8_t *uid, uint8_t uid_length);
 
  private:
   uint8_t fifo_data_[MAX_FIFO_SIZE];
