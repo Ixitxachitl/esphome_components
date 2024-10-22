@@ -21,17 +21,17 @@ class MFRC522I2C : public rc522::RC522, public i2c::I2CDevice {
  public:
   MFRC522I2C() : x_(0), y_("") {}
 
-  // Directly expose x_ and y_ as public members
+  // Public variables for direct access
   uint32_t x_;
   std::string y_;
 
-  void on_scan();
+  void on_scan() override;
 
-  // Implement the pure virtual methods from RC522
-  uint8_t pcd_read_register(PcdRegister reg) override;
-  void pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
-  void pcd_write_register(PcdRegister reg, uint8_t value) override;
-  void pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) override;
+  // Implement all pure virtual methods from RC522
+  uint8_t pcd_read_register(rc522::RC522::PcdRegister reg) override;
+  void pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) override;
+  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) override;
+  void pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) override;
 
  protected:
   uint8_t read_uid(uint8_t *uid);

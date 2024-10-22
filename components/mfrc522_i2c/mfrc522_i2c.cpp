@@ -27,9 +27,9 @@ void MFRC522I2C::on_scan() {
 
 // Read UID and return its length
 uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
-  uint8_t uid_length = this->pcd_read_register(static_cast<PcdRegister>(UIDSizeReg));
+  uint8_t uid_length = this->pcd_read_register(rc522::RC522::UIDSizeReg);
   if (uid_length > 0) {
-    this->pcd_read_register(static_cast<PcdRegister>(UIDStartReg), uid_length, uid, 0);
+    this->pcd_read_register(rc522::RC522::UIDStartReg, uid_length, uid, 0);
   }
   return uid_length;
 }
@@ -37,7 +37,7 @@ uint8_t MFRC522I2C::read_uid(uint8_t *uid) {
 // Read FIFO data into a buffer
 void MFRC522I2C::read_fifo_data(uint8_t count) {
   if (count > 0 && count <= MAX_FIFO_SIZE) {
-    this->pcd_read_register(static_cast<PcdRegister>(FIFODataReg), count, this->fifo_data_, 0);
+    this->pcd_read_register(rc522::RC522::FIFODataReg, count, this->fifo_data_, 0);
     this->fifo_data_length_ = count;
   }
 }
@@ -55,21 +55,21 @@ std::string MFRC522I2C::get_fifo_data_as_string() {
 }
 
 // Implement the pure virtual methods from RC522
-uint8_t MFRC522I2C::pcd_read_register(PcdRegister reg) {
+uint8_t MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg) {
   uint8_t value;
   rc522::RC522::pcd_read_register(reg, 1, &value, 0);
   return value;
 }
 
-void MFRC522I2C::pcd_read_register(PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
+void MFRC522I2C::pcd_read_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values, uint8_t rx_align) {
   rc522::RC522::pcd_read_register(reg, count, values, rx_align);
 }
 
-void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t value) {
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t value) {
   rc522::RC522::pcd_write_register(reg, value);
 }
 
-void MFRC522I2C::pcd_write_register(PcdRegister reg, uint8_t count, uint8_t *values) {
+void MFRC522I2C::pcd_write_register(rc522::RC522::PcdRegister reg, uint8_t count, uint8_t *values) {
   rc522::RC522::pcd_write_register(reg, count, values);
 }
 
