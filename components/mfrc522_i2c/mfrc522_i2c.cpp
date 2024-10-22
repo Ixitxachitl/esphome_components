@@ -13,33 +13,37 @@ void MFRC522I2C::dump_config() {
 }
 
 bool MFRC522I2C::read_full_uid(uint8_t *uid, uint8_t *uid_length) {
-  // Implement reading the full UID from the tag
-  if (this->pcd_read_register(PcdRegister::CollReg) & 0x80) {
-    ESP_LOGW(TAG, "Collision detected while reading UID");
-    return false;
-  }
-  *uid_length = this->get_uid(uid);
+  // Send Anti-collision command
+  this->pcd_write_register(0x0D, 0x93);  // CommandReg = PCD_Anticoll (0x93)
+  
+  // Read UID from FIFODataReg (register 0x09)
+  *uid_length = 5;  // Assuming a 5-byte UID
+  this->pcd_read_register(0x09, *uid_length, uid, 0);  // FIFODataReg is 0x09
+
   ESP_LOGI(TAG, "UID: %s", format_hex_pretty(uid, *uid_length).c_str());
-  std::string uid_str = format_hex_pretty(uid, *uid_length);
-  id(uid_sensor).publish_state(uid_str);
   return true;
 }
 
 bool MFRC522I2C::read_sak(uint8_t *sak) {
-  // Implement reading the SAK value from the tag
-  *sak = this->pcd_read_register(PcdRegister::ControlReg);
+  // Send SELECT command to get SAK
+  this->pcd_write_register(0x0D, 0x70);  // CommandReg = PCD_Select (0x70)
+
+  // Read SAK from FIFODataReg
+  *sak = this->pcd_read_register(0x09);  // FIFODataReg is 0x09
   ESP_LOGI(TAG, "SAK: 0x%02X", *sak);
-  id(sak_sensor).publish_state(std::to_string(*sak));
   return true;
 }
 
 bool MFRC522I2C::read_atqa(uint16_t *atqa) {
-  // Implement reading the ATQA value from the tag
-  uint8_t atqa_buf[2];
-  this->pcd_read_register(PcdRegister::ATQAReg, 2, atqa_buf, 0);
+  // Send REQA command to get ATQA
+  this->pcd_write_register(0x0D, 0x26);  // CommandReg = PCD_REQA (0x26)
+
+  // Read ATQA from FIFODataReg
+  uint8_t atqa_buf[2] = {0};
+  this->pcd_read_register(0x09, 2, atqa_buf, 0);  // FIFODataReg is 0x09
   *atqa = (atqa_buf[0] << 8) | atqa_buf[1];
+
   ESP_LOGI(TAG, "ATQA: 0x%04X", *atqa);
-  id(atqa_sensor).publish_state(std::to_string(*atqa));
   return true;
 }
 
